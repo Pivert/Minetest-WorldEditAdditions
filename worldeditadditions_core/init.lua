@@ -65,6 +65,28 @@ wea_c.entities = dofile(modpath.."/core/entities/init.lua") -- AFTER pos
 dofile(modpath.."/core/pos_marker_manage.lua") -- AFTER pos, entities
 dofile(modpath.."/core/pos_marker_wall_manage.lua") -- AFTER pos, entities
 
+-- Cleanup any existing nil entries in registered commands tables to prevent crashes
+local function cleanup_nil_entries()
+	-- Clean up WorldEditAdditions registered commands
+	for cmdname, def in pairs(wea_c.registered_commands) do
+		if def == nil then
+			wea_c.registered_commands[cmdname] = nil
+		end
+	end
+	
+	-- Clean up WorldEdit registered commands if available
+	if minetest.global_exists("worldedit") and worldedit.registered_commands then
+		for cmdname, def in pairs(worldedit.registered_commands) do
+			if def == nil then
+				worldedit.registered_commands[cmdname] = nil
+			end
+		end
+	end
+end
+
+-- Run cleanup immediately
+cleanup_nil_entries()
+
 -- Initialise WorldEdit stuff if the WorldEdit mod is not present
 if minetest.global_exists("worldedit") then
 	dofile(wea_c.modpath.."/core/integrations/worldedit.lua")
